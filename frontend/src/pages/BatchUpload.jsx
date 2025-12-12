@@ -3,6 +3,8 @@ import axios from 'axios';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { Upload, FileText, CheckCircle, AlertCircle, ArrowLeft, Download, Database } from 'lucide-react';
+import { jsPDF } from 'jspdf';
+import autoTable from 'jspdf-autotable';
 
 export default function BatchUpload() {
     const navigate = useNavigate();
@@ -39,6 +41,66 @@ export default function BatchUpload() {
             setError("Failed to process batch file. Ensure CSV format is correct.");
         } finally {
             setUploading(false);
+        }
+    };
+
+    const handleExportPDF = () => {
+        try {
+            if (!results || results.length === 0) return;
+
+            const doc = new jsPDF();
+
+            // Brand Header
+            doc.setFillColor(20, 184, 166); // Teal 500
+            doc.rect(0, 0, 210, 20, 'F');
+            doc.setFontSize(16);
+            doc.setTextColor(255, 255, 255);
+            doc.text("CORTEX MED // BATCH ANALYSIS REPORT", 10, 13);
+
+            // Metadata
+            doc.setTextColor(0, 0, 0);
+            doc.setFontSize(10);
+            doc.text(`Generated: ${new Date().toLocaleString()}`, 10, 30);
+            doc.text(`Total Records: ${results.length}`, 150, 30);
+
+            // Table Data
+            const tableRows = results.map(row => [
+                row.seqn,
+                row.cluster,
+                row.cluster_name,
+                row.risk_profile
+            ]);
+
+            // Generate Table
+            autoTable(doc, {
+                startY: 40,
+                head: [['ID', 'Cluster', 'Classification', 'Risk']],
+                body: tableRows,
+                theme: 'grid',
+                headStyles: { fillColor: [23, 23, 23] }, // Neutral 900
+                styles: { fontSize: 8 },
+                columnStyles: {
+                    0: { cellWidth: 20 },
+                    1: { cellWidth: 20 },
+                    2: { cellWidth: 'auto' },
+                    3: { cellWidth: 30 }
+                },
+                didParseCell: (data) => {
+                    if (data.section === 'body' && data.column.index === 3) {
+                        if (data.cell.raw === 'High') {
+                            data.cell.styles.textColor = [220, 38, 38]; // Red
+                            data.cell.styles.fontStyle = 'bold';
+                        } else {
+                            data.cell.styles.textColor = [16, 185, 129]; // Emerald
+                        }
+                    }
+                }
+            });
+
+            doc.save('batch_analysis_report.pdf');
+        } catch (err) {
+            console.error(err);
+            alert("Export Error: " + err.message);
         }
     };
 
@@ -136,7 +198,9 @@ export default function BatchUpload() {
                                         </h2>
                                         <div className="flex items-center gap-4">
                                             <span className="px-3 py-1 bg-neutral-800 rounded text-xs text-neutral-400 border border-white/5">{results.length} Records</span>
-                                            <button className="text-xs font-bold text-teal-500 hover:text-teal-400 flex items-center transition-colors">
+                                            <button
+                                                onClick={handleExportPDF}
+                                                className="text-xs font-bold text-teal-500 hover:text-teal-400 flex items-center transition-colors cursor-pointer">
                                                 <Download className="w-4 h-4 mr-1" /> Export Report
                                             </button>
                                         </div>
@@ -166,8 +230,8 @@ export default function BatchUpload() {
                                                         </td>
                                                         <td className="p-5 text-right">
                                                             <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${row.risk_profile === 'High'
-                                                                    ? 'bg-red-500/10 text-red-500 border border-red-500/20'
-                                                                    : 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20'
+                                                                ? 'bg-red-500/10 text-red-500 border border-red-500/20'
+                                                                : 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20'
                                                                 }`}>
                                                                 {row.risk_profile}
                                                             </span>

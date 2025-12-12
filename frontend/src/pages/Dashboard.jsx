@@ -4,8 +4,8 @@ import axios from 'axios';
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, AreaChart, Area, ReferenceLine, Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis } from 'recharts';
 import { Activity, Heart, Zap, ArrowRight, AlertTriangle, CheckCircle2, User, ChevronLeft, Hexagon, Download } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import jsPDF from 'jspdf';
-import 'jspdf-autotable';
+import { jsPDF } from 'jspdf';
+import autoTable from 'jspdf-autotable';
 
 // --- Sub-components (Inline for simplicity given file constraints) ---
 
@@ -103,66 +103,71 @@ export default function Dashboard() {
     };
 
     const handleExportPDF = () => {
-        if (!results) return;
+        try {
+            if (!results) return;
 
-        const doc = new jsPDF();
+            const doc = new jsPDF();
 
-        // Brand Header
-        doc.setFillColor(20, 184, 166); // Teal 500
-        doc.rect(0, 0, 210, 20, 'F');
-        doc.setFontSize(16);
-        doc.setTextColor(255, 255, 255);
-        doc.text("CORTEX MED // CLINICAL DOSSIER", 10, 13);
+            // Brand Header
+            doc.setFillColor(20, 184, 166); // Teal 500
+            doc.rect(0, 0, 210, 20, 'F');
+            doc.setFontSize(16);
+            doc.setTextColor(255, 255, 255);
+            doc.text("CORTEX MED // CLINICAL DOSSIER", 10, 13);
 
-        // Metadata
-        doc.setTextColor(0, 0, 0);
-        doc.setFontSize(10);
-        doc.text(`Generated: ${new Date().toLocaleString()}`, 10, 30);
-        doc.text(`Patient ID: ${Math.random().toString(36).substr(2, 9).toUpperCase()}`, 150, 30);
+            // Metadata
+            doc.setTextColor(0, 0, 0);
+            doc.setFontSize(10);
+            doc.text(`Generated: ${new Date().toLocaleString()}`, 10, 30);
+            doc.text(`Patient ID: ${Math.random().toString(36).substr(2, 9).toUpperCase()}`, 150, 30);
 
-        // Vitals Grid
-        doc.autoTable({
-            startY: 35,
-            head: [['Metric', 'Value', 'Metric', 'Value']],
-            body: [
-                ['Age', formData.Age, 'Gender', formData.Gender === 1 ? 'Male' : 'Female'],
-                ['BMI', formData.BMI, 'Glucose', `${formData.Glucose} mg/dL`],
-                ['Systolic BP', `${formData.SystolicBP} mmHg`, 'Daily Calories', `${formData.Calories} kcal`]
-            ],
-            theme: 'grid',
-            headStyles: { fillColor: [23, 23, 23] } // Neutral 900
-        });
+            // Vitals Grid
+            autoTable(doc, {
+                startY: 35,
+                head: [['Metric', 'Value', 'Metric', 'Value']],
+                body: [
+                    ['Age', formData.Age, 'Gender', formData.Gender === 1 ? 'Male' : 'Female'],
+                    ['BMI', formData.BMI, 'Glucose', `${formData.Glucose} mg/dL`],
+                    ['Systolic BP', `${formData.SystolicBP} mmHg`, 'Daily Calories', `${formData.Calories} kcal`]
+                ],
+                theme: 'grid',
+                headStyles: { fillColor: [23, 23, 23] } // Neutral 900
+            });
 
-        // Classification
-        doc.setFontSize(12);
-        doc.setFont("helvetica", "bold");
-        doc.text("Neural Segmentation Analysis", 10, doc.lastAutoTable.finalY + 15);
+            // Classification
+            doc.setFontSize(12);
+            doc.setFont("helvetica", "bold");
+            doc.text("Neural Segmentation Analysis", 10, doc.lastAutoTable.finalY + 15);
 
-        doc.setFontSize(10);
-        doc.setFont("helvetica", "normal");
-        doc.text(`Cluster Profile: ${results.cluster_name}`, 10, doc.lastAutoTable.finalY + 22);
-        doc.text(`Risk Assessment: ${results.risk_profile}`, 10, doc.lastAutoTable.finalY + 27);
+            doc.setFontSize(10);
+            doc.setFont("helvetica", "normal");
+            doc.text(`Cluster Profile: ${results.cluster_name}`, 10, doc.lastAutoTable.finalY + 22);
+            doc.text(`Risk Assessment: ${results.risk_profile}`, 10, doc.lastAutoTable.finalY + 27);
 
-        // Narrative Analysis (The new feature)
-        if (results.narrative) {
-            doc.setFontSize(11);
-            doc.setFont("helvetica", "italic");
-            doc.setTextColor(80, 80, 80);
-            const splitText = doc.splitTextToSize(results.narrative, 190);
-            doc.text(splitText, 10, doc.lastAutoTable.finalY + 40);
+            // Narrative Analysis (The new feature)
+            if (results.narrative) {
+                doc.setFontSize(11);
+                doc.setFont("helvetica", "italic");
+                doc.setTextColor(80, 80, 80);
+                const splitText = doc.splitTextToSize(results.narrative, 190);
+                doc.text(splitText, 10, doc.lastAutoTable.finalY + 40);
+            }
+
+            // Action Plan
+            const actions = results.actions.map((act, i) => [i + 1, act.replace(/_/g, ' ')]);
+            autoTable(doc, {
+                startY: results.narrative ? doc.lastAutoTable.finalY + 60 : doc.lastAutoTable.finalY + 45,
+                head: [['Step', 'Recommended Intervention']],
+                body: actions,
+                theme: 'striped',
+                headStyles: { fillColor: [20, 184, 166] } // Teal
+            });
+
+            doc.save('clinical_report.pdf');
+        } catch (err) {
+            console.error(err);
+            alert("Export Error: " + err.message);
         }
-
-        // Action Plan
-        const actions = results.actions.map((act, i) => [i + 1, act.replace(/_/g, ' ')]);
-        doc.autoTable({
-            startY: results.narrative ? doc.lastAutoTable.finalY + 60 : doc.lastAutoTable.finalY + 45,
-            head: [['Step', 'Recommended Intervention']],
-            body: actions,
-            theme: 'striped',
-            headStyles: { fillColor: [20, 184, 166] } // Teal
-        });
-
-        doc.save('clinical_report.pdf');
     };
 
     return (
@@ -186,7 +191,7 @@ export default function Dashboard() {
                     {results && (
                         <button
                             onClick={handleExportPDF}
-                            className="hidden md:flex items-center gap-2 px-4 py-2 bg-neutral-800 hover:bg-neutral-700 text-teal-500 font-bold text-xs rounded-lg transition-colors"
+                            className="hidden md:flex items-center gap-2 px-4 py-2 bg-neutral-800 hover:bg-neutral-700 text-teal-500 font-bold text-xs rounded-lg transition-colors cursor-pointer"
                         >
                             <Download className="w-4 h-4" /> Export Dossier
                         </button>
