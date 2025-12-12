@@ -1,0 +1,106 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Manrope:wght@400;500;700;800&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* Clinical Graphite Palette */
+  --bg-primary: #0a0a0a;
+  /* Neutral Black */
+  --bg-secondary: #171717;
+  /* Neutral 900 */
+
+  --accent-primary: #14b8a6;
+  /* Teal 500 */
+  --accent-secondary: #10b981;
+  /* Emerald 500 */
+  --accent-glow: rgba(20, 184, 166, 0.1);
+
+  --glass-border: rgba(255, 255, 255, 0.05);
+  --glass-surface: rgba(23, 23, 23, 0.7);
+
+  --text-main: #f5f5f5;
+  --text-muted: #a3a3a3;
+}
+
+body {
+  background-color: var(--bg-primary);
+  color: var(--text-main);
+  font-family: 'Inter', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  background-image:
+    radial-gradient(circle at 50% 0%, rgba(20, 184, 166, 0.05), transparent 40%),
+    linear-gradient(to bottom, #0a0a0a 0%, #0a0a0a 100%);
+  min-height: 100vh;
+}
+
+/* Typography */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+.brand-font {
+  font-family: 'Manrope', sans-serif;
+  letter-spacing: -0.01em;
+}
+
+/* Premium Components */
+@layer components {
+  .glass-card {
+    @apply bg-neutral-900/60 backdrop-blur-md border border-white/5 shadow-xl rounded-xl;
+    box-shadow:
+      0 4px 20px -5px rgba(0, 0, 0, 0.3),
+      inset 0 1px 0 0 rgba(255, 255, 255, 0.03);
+  }
+
+  .glass-input {
+    @apply bg-neutral-950/60 border border-neutral-800 rounded-lg px-4 py-3 text-sm focus:ring-1 focus:ring-teal-500/50 focus:border-teal-500/50 transition-all outline-none text-neutral-200 placeholder-neutral-600;
+  }
+
+  .btn-primary {
+    @apply bg-teal-600 hover:bg-teal-500 text-white font-semibold px-6 py-3 rounded-lg transition-all active:scale-95 shadow-lg shadow-teal-900/20 flex items-center justify-center gap-2;
+  }
+
+  .btn-secondary {
+    @apply bg-neutral-800 hover:bg-neutral-700 text-neutral-300 border border-white/5 font-medium px-6 py-3 rounded-lg transition-all active:scale-95 flex items-center justify-center gap-2;
+  }
+
+  .label-text {
+    @apply block text-xs font-medium text-neutral-500 uppercase tracking-widest mb-2;
+  }
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #262626;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #404040;
+}
+
+/* Range Slider Styling */
+input[type=range] {
+  @apply appearance-none bg-transparent cursor-pointer w-full;
+}
+
+input[type=range]::-webkit-slider-runnable-track {
+  @apply h-1.5 bg-neutral-800 rounded-full;
+}
+
+input[type=range]::-webkit-slider-thumb {
+  @apply appearance-none w-4 h-4 bg-teal-500 rounded-full -mt-1.5 shadow-md shadow-black/50 transition-transform hover:scale-110 active:scale-95 border border-neutral-900;
+}

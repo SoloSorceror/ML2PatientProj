@@ -1,0 +1,10 @@
+fastapi
+uvicorn
+python-multipart
+pandas
+numpy
+scikit-learn
+umap-learn
+joblib
+matplotlib
+plotly
