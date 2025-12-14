@@ -9,7 +9,7 @@
 ---
 
 ## ✨ Features (V2.0)
-- **🧠 Neural Segmentation**: Categorizes patients into 9 distinct clusters (e.g., "Healthy Young Adult", "Middle-Aged Metabolic Risk") using 19+ biometric markers.
+- **🧠 Neural Segmentation**: Categorizes patients into 5 distinct clusters (e.g., "Healthy Young Adult", "Middle-Aged Metabolic Risk") using 19+ biometric markers.
 - **⚡ Real-Time Diagnostics**: Instant analysis of patient risk profiles via FastAPI backend.
 - **🔮 Trajectory Simulation**: Predicts health outcomes (BMI, Glucose reduction) based on suggested interventions.
 - **📂 Batch Analysis**: Process hundreds of patient records via CSV upload ("Batch Mode").
