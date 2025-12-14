@@ -1,0 +1,47 @@
+graph TD
+    subgraph Client ["Frontend (Client Layer)"]
+        UI[React + Vite UI]
+        Dashboard[Dashboard View]
+        Batch[Batch Upload View]
+        UI -->|HTTP Requests| API
+        Dashboard -->|Single Patient Data| API
+        Batch -->|CSV File| API
+    end
+
+    subgraph Server ["Backend (Application Layer)"]
+        API[FastAPI Server]
+        Auth[Validation & Auth]
+        Router[API Router]
+        
+        API --> Router
+        Router -->|/predict_cluster| Predict[Prediction Service]
+        Router -->|/batch_predict| BatchProc[Batch Processing]
+    end
+
+    subgraph ML ["ML Pipeline (Intelligence Layer)"]
+        Pipeline[Sklearn Pipeline]
+        Scaler[StandardScaler & OneHotEncoder]
+        UMAP[UMAP Reducer]
+        KMeans[KMeans Clustering]
+        RecSys[Recommender System]
+        Narrative[Narrative Generator]
+
+        Predict --> Pipeline
+        BatchProc --> Pipeline
+        
+        Pipeline --> Scaler
+        Scaler --> UMAP
+        UMAP --> KMeans
+        KMeans --> RecSys
+        RecSys --> Narrative
+        
+        Disk[(Model Files)]
+        Disk -.->|Load Models| Scaler
+        Disk -.->|Load Models| UMAP
+        Disk -.->|Load Models| KMeans
+    end
+
+    subgraph Data ["Data Layer"]
+        Dataset[(Patient Dataset CSV)]
+        Processed[(Processed Data)]
+    end

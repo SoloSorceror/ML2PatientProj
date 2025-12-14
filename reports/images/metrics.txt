@@ -1,0 +1,3 @@
+Silhouette: 0.0099
+Calinski-Harabasz: 912.5278
+Davies-Bouldin: 2.8406
